@@ -57,7 +57,7 @@ A React app that connects to a backend Rails API and database to display and ord
 
 ### Backend Setup
 
-- See the [restaurant-backend-app](https://github.com/YOUR_GITHUB_USERNAME/restaurant-backend-app) for Rails API setup.
+- See the [menu_query](https://github.com/bardon123/menu_query) -  for Rails API setup.
 
 ## Deployment
 
