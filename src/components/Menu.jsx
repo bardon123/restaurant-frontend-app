@@ -67,7 +67,9 @@ function Menu() {
 											<div className="item-header">
 												<span className="item-label">{item.label}</span>
 												{item.price > 0 && (
-													<span className="item-price">
+													<span
+														className="item-price"
+														style={{ color: "#FFD700", fontWeight: "bold" }}>
 														${item.price.toFixed(2)}
 													</span>
 												)}

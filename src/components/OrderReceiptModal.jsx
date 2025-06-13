@@ -43,7 +43,9 @@ export default function OrderReceiptModal({ order, items, onClose }) {
 									<span className="item-name">
 										{orderItem.item.label} × {orderItem.quantity}
 									</span>
-									<span className="item-price">
+									<span
+										className="item-price"
+										style={{ color: "#FFD700", fontWeight: "bold" }}>
 										${orderItem.price?.toFixed(2)}
 									</span>
 								</div>
@@ -57,7 +59,16 @@ export default function OrderReceiptModal({ order, items, onClose }) {
 											return (
 												<div key={mod.id} className="receipt-modifier">
 													<span className="modifier-name">+ {mod.label}</span>
-													<span className="modifier-price">
+													<span
+														className="modifier-price"
+														style={{
+															color: "#FFD700",
+															fontWeight: "bold",
+															marginLeft: "0.5rem",
+															background: "none",
+															border: "none",
+															padding: 0,
+														}}>
 														${modPrice.toFixed(2)}
 													</span>
 												</div>
@@ -79,7 +90,9 @@ export default function OrderReceiptModal({ order, items, onClose }) {
 						)}
 						<div className="receipt-total">
 							<span>Total:</span>
-							<span>${order.totalPrice?.toFixed(2) ?? "0.00"}</span>
+							<span style={{ color: "#FFD700", fontWeight: "bold" }}>
+								${order.totalPrice?.toFixed(2) ?? "0.00"}
+							</span>
 						</div>
 					</div>
 				</div>

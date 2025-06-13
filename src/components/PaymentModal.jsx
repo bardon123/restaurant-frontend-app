@@ -195,7 +195,11 @@ export default function PaymentModal({
 							<div key={idx} className="receipt-item">
 								<div className="receipt-item-header">
 									<span className="item-name">{item.label}</span>
-									<span className="item-price">${item.price?.toFixed(2)}</span>
+									<span
+										className="item-price"
+										style={{ color: "#FFD700", fontWeight: "bold" }}>
+										${item.price?.toFixed(2)}
+									</span>
 								</div>
 								{item.selectedModifiers &&
 									Object.entries(item.selectedModifiers).map(
@@ -211,7 +215,16 @@ export default function PaymentModal({
 												<div key={mod.id} className="receipt-modifier">
 													<span className="modifier-name">+ {mod.label}</span>
 													{mod.item?.price > 0 && (
-														<span className="modifier-price">
+														<span
+															className="modifier-price"
+															style={{
+																color: "#FFD700",
+																fontWeight: "bold",
+																marginLeft: "0.5rem",
+																background: "none",
+																border: "none",
+																padding: 0,
+															}}>
 															${mod.item.price.toFixed(2)}
 														</span>
 													)}
@@ -243,7 +256,9 @@ export default function PaymentModal({
 						)}
 						<div className="receipt-total">
 							<span>Total:</span>
-							<span>${finalTotal.toFixed(2)}</span>
+							<span style={{ color: "#FFD700", fontWeight: "bold" }}>
+								${finalTotal.toFixed(2)}
+							</span>
 						</div>
 					</div>
 				</div>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { clearCart } from "../store";
-import { useMutation, gql } from "@apollo/client";
+import { clearCart, removeFromCart } from "../store";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 import OrderReceiptModal from "./OrderReceiptModal";
@@ -95,9 +94,26 @@ export default function CartItemsModal({ isCartModalOpen, onCloseCartModal }) {
 								<div
 									style={{
 										display: "flex",
-										justifyContent: "space-between",
+										justifyContent: "flex-start",
 										alignItems: "center",
+										gap: 8,
 									}}>
+									<button
+										className="remove-item-button"
+										style={{
+											marginRight: 12,
+											background: "#FFD700",
+											color: "#000",
+											border: "none",
+											borderRadius: 4,
+											padding: "0.2rem 0.7rem",
+											fontWeight: "bold",
+											cursor: "pointer",
+										}}
+										onClick={() => dispatch(removeFromCart(idx))}
+										aria-label={`Remove ${item.label} from cart`}>
+										×
+									</button>
 									<span
 										style={{
 											fontWeight: "bold",
@@ -106,7 +122,13 @@ export default function CartItemsModal({ isCartModalOpen, onCloseCartModal }) {
 										}}>
 										{item.label}
 									</span>
-									<span className="item-price">
+									<span
+										className="item-price"
+										style={{
+											color: "#FFD700",
+											fontWeight: "bold",
+											marginLeft: "auto",
+										}}>
 										${getItemTotal(item).toFixed(2)}
 									</span>
 								</div>
@@ -163,7 +185,14 @@ export default function CartItemsModal({ isCartModalOpen, onCloseCartModal }) {
 																		{mod.item?.price > 0 && (
 																			<span
 																				className="modifier-price"
-																				style={{ marginLeft: "0.5rem" }}>
+																				style={{
+																					color: "#FFD700",
+																					fontWeight: "bold",
+																					marginLeft: "0.5rem",
+																					background: "none",
+																					border: "none",
+																					padding: 0,
+																				}}>
 																				+${mod.item.price.toFixed(2)}
 																			</span>
 																		)}
