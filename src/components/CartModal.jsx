@@ -1,29 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useCart } from "../context/CartContext";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../store";
 import "./CartModal.css";
 
-function filterModifiers(item) {
-	// For Pizza: only show 'Extra Cheese'
-	if (item.label.toLowerCase() === "pizza") {
-		return item.modifierGroups
-			?.map((group) => ({
-				...group,
-				modifiers: group.modifiers.filter(
-					(mod) => mod.label.toLowerCase() === "extra cheese"
-				),
-			}))
-			.filter((group) => group.modifiers.length > 0);
-	}
-	// For Burger: show all extras (no filtering)
-	if (item.label.toLowerCase() === "burger") {
-		return item.modifierGroups;
-	}
-	// Default: show all
-	return item.modifierGroups;
-}
-
-function CartModal() {
-	const { selectedItem, addToCart, closeModal } = useCart();
+function CartModal({ selectedItem, closeModal }) {
+	const dispatch = useDispatch();
 	const [selectedModifiers, setSelectedModifiers] = useState({});
 
 	// Reset selectedModifiers every time a new item is selected
@@ -33,7 +14,27 @@ function CartModal() {
 
 	if (!selectedItem) return null;
 
-	const filteredModifierGroups = filterModifiers(selectedItem);
+	// Debug logging
+	console.log("Selected Item:", selectedItem);
+	console.log("Modifier Groups:", selectedItem.modifierGroups);
+
+	let filteredModifierGroups = selectedItem.modifierGroups;
+	if (selectedItem.label.toLowerCase() === "burger") {
+		// Show all modifier groups for burger
+		filteredModifierGroups = selectedItem.modifierGroups;
+		console.log("Burger Modifier Groups:", filteredModifierGroups);
+	} else if (selectedItem.label.toLowerCase() === "pizza") {
+		// Show only toppings for pizza
+		filteredModifierGroups = selectedItem.modifierGroups.filter(
+			(group) => group.label.toLowerCase() === "toppings"
+		);
+	} else {
+		// Default: show all
+		filteredModifierGroups = selectedItem.modifierGroups;
+	}
+
+	// Debug logging for filtered groups
+	console.log("Filtered Modifier Groups:", filteredModifierGroups);
 
 	const handleModifierChange = (groupId, modifierId, checked) => {
 		setSelectedModifiers((prev) => ({
@@ -45,7 +46,13 @@ function CartModal() {
 	};
 
 	const handleAddToCart = () => {
-		addToCart(selectedItem, selectedModifiers);
+		dispatch(
+			addToCart({
+				...selectedItem,
+				selectedModifiers,
+			})
+		);
+		closeModal();
 	};
 
 	return (
@@ -57,34 +64,45 @@ function CartModal() {
 					<p className="item-price">${selectedItem.price?.toFixed(2)}</p>
 				</div>
 
-				{filteredModifierGroups?.map((group) => (
-					<div key={group.id} className="modal-modifier-group">
-						<h4>{group.label}</h4>
-						<div className="modifier-options">
-							{group.modifiers.map((modifier) => (
-								<label key={modifier.id} className="modifier-option">
-									<input
-										type="checkbox"
-										checked={selectedModifiers[group.id]?.includes(modifier.id)}
-										onChange={(e) =>
-											handleModifierChange(
-												group.id,
-												modifier.id,
-												e.target.checked
-											)
-										}
-									/>
-									<span className="modifier-label">{modifier.label}</span>
-									{modifier.item?.price > 0 && (
-										<span className="modifier-price">
-											+${modifier.item.price.toFixed(2)}
-										</span>
-									)}
-								</label>
-							))}
+				{filteredModifierGroups?.map((group) => {
+					// Debug logging for each group
+					console.log(
+						"Rendering group:",
+						group.label,
+						"with modifiers:",
+						group.modifiers
+					);
+					return (
+						<div key={group.id} className="modal-modifier-group">
+							<h4>{group.label}</h4>
+							<div className="modifier-options">
+								{group.modifiers.map((modifier) => (
+									<label key={modifier.id} className="modifier-option">
+										<input
+											type="checkbox"
+											checked={selectedModifiers[group.id]?.includes(
+												modifier.id
+											)}
+											onChange={(e) =>
+												handleModifierChange(
+													group.id,
+													modifier.id,
+													e.target.checked
+												)
+											}
+										/>
+										<span className="modifier-label">{modifier.label}</span>
+										{modifier.item?.price > 0 && (
+											<span className="modifier-price">
+												+${modifier.item.price.toFixed(2)}
+											</span>
+										)}
+									</label>
+								))}
+							</div>
 						</div>
-					</div>
-				))}
+					);
+				})}
 
 				<div className="modal-actions">
 					<button className="cancel-button" onClick={closeModal}>

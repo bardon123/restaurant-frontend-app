@@ -1,15 +1,15 @@
 import React from "react";
-import { useCart } from "../context/CartContext";
+import { useSelector } from "react-redux";
 import "./CartPreview.css";
 
-function CartPreview() {
-	const { cart, openCartModal } = useCart();
+function CartPreview({ onOpenCartModal }) {
+	const cart = useSelector((state) => state.cart.items);
 	const itemCount = cart.length;
 
 	return (
 		<button
 			className="cart-preview"
-			onClick={openCartModal}
+			onClick={onOpenCartModal}
 			aria-label="View cart">
 			<img
 				src={process.env.PUBLIC_URL + "/assets/svgs/pokeball_icon.png"}

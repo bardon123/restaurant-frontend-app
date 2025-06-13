@@ -1,5 +1,11 @@
-import React from "react";
-import { useCart } from "../context/CartContext";
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { clearCart } from "../store";
+import { useMutation, gql } from "@apollo/client";
+import LoginForm from "./LoginForm";
+import RegisterForm from "./RegisterForm";
+import OrderReceiptModal from "./OrderReceiptModal";
+import PaymentModal from "./PaymentModal";
 import "./CartModal.css";
 
 function getItemTotal(item) {
@@ -21,11 +27,50 @@ function getItemTotal(item) {
 	return total;
 }
 
-function CartItemsModal() {
-	const { cart, isCartModalOpen, closeCartModal, clearCart } = useCart();
+export default function CartItemsModal({ isCartModalOpen, onCloseCartModal }) {
+	const cart = useSelector((state) => state.cart.items);
+	const token = useSelector((state) => state.auth.token);
+	const dispatch = useDispatch();
+	const [showAuthModal, setShowAuthModal] = useState(false);
+	const [showLogin, setShowLogin] = useState(true);
+	const [orderSuccess, setOrderSuccess] = useState(false);
+	const [orderError, setOrderError] = useState("");
+	const [orderReceipt, setOrderReceipt] = useState(null);
+	const [showPaymentModal, setShowPaymentModal] = useState(false);
 
 	// Calculate grand total
 	const grandTotal = cart.reduce((sum, item) => sum + getItemTotal(item), 0);
+
+	const handleCheckout = () => {
+		if (!token) {
+			setShowAuthModal(true);
+			return;
+		}
+		setShowPaymentModal(true);
+	};
+
+	useEffect(() => {
+		console.log("token changed", token, showAuthModal);
+		if (token && showAuthModal) {
+			setShowAuthModal(false);
+		}
+	}, [token, showAuthModal]);
+
+	// Hide cart modal when showing receipt
+	if (orderReceipt) {
+		return (
+			<OrderReceiptModal
+				order={orderReceipt}
+				items={cart}
+				onClose={() => {
+					setOrderReceipt(null);
+					setOrderSuccess(false);
+					setOrderError("");
+					onCloseCartModal();
+				}}
+			/>
+		);
+	}
 
 	if (!isCartModalOpen) return null;
 
@@ -152,18 +197,83 @@ function CartItemsModal() {
 					</div>
 				)}
 				<div className="modal-actions">
-					<button className="cancel-button" onClick={closeCartModal}>
+					<button className="cancel-button" onClick={onCloseCartModal}>
 						Close
 					</button>
 					{cart.length > 0 && (
-						<button className="confirm-button" onClick={clearCart}>
-							Clear Cart
-						</button>
+						<>
+							<button
+								className="confirm-button"
+								onClick={() => dispatch(clearCart())}>
+								Clear Cart
+							</button>
+							<button className="confirm-button" onClick={handleCheckout}>
+								Checkout
+							</button>
+						</>
 					)}
 				</div>
+				{/* Order Success/Error */}
+				{orderSuccess && !orderReceipt && (
+					<div className="auth-success" style={{ marginTop: "1rem" }}>
+						Order placed successfully!
+					</div>
+				)}
+				{orderError && (
+					<div className="auth-error" style={{ marginTop: "1rem" }}>
+						{orderError}
+					</div>
+				)}
+				{/* Auth Modal for Checkout */}
+				{showAuthModal && (
+					<div className="modal-overlay">
+						<div className="modal-content" style={{ maxWidth: 400 }}>
+							<button
+								className="cancel-button"
+								style={{ float: "right", marginBottom: "1rem" }}
+								onClick={() => setShowAuthModal(false)}>
+								Close
+							</button>
+							<div
+								style={{
+									display: "flex",
+									justifyContent: "center",
+									gap: "1rem",
+									marginBottom: "1rem",
+								}}>
+								<button
+									className="nav-link"
+									style={{ fontSize: "0.8rem" }}
+									onClick={() => setShowLogin(true)}>
+									Login
+								</button>
+								<button
+									className="nav-link"
+									style={{ fontSize: "0.8rem" }}
+									onClick={() => setShowLogin(false)}>
+									Register
+								</button>
+							</div>
+							{showLogin ? (
+								<LoginForm onSuccess={() => setShowAuthModal(false)} />
+							) : (
+								<RegisterForm onSuccess={() => setShowAuthModal(false)} />
+							)}
+						</div>
+					</div>
+				)}
+				<PaymentModal
+					isOpen={showPaymentModal}
+					onClose={() => setShowPaymentModal(false)}
+					cartItems={cart}
+					grandTotal={grandTotal}
+					onPaymentSuccess={(order) => {
+						setOrderReceipt(order);
+						setShowPaymentModal(false);
+						dispatch(clearCart());
+					}}
+				/>
 			</div>
 		</div>
 	);
 }
-
-export default CartItemsModal;

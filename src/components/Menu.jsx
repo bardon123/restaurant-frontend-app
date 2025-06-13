@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery, gql } from "@apollo/client";
-import { useCart } from "../context/CartContext";
 import CartModal from "./CartModal";
 import "./Menu.css";
 
@@ -37,7 +36,18 @@ const GET_MENUS = gql`
 
 function Menu() {
 	const { loading, error, data } = useQuery(GET_MENUS);
-	const { openAddToCartModal } = useCart();
+	const [selectedItem, setSelectedItem] = useState(null);
+	const [showCartModal, setShowCartModal] = useState(false);
+
+	const openAddToCartModal = (item) => {
+		setSelectedItem(item);
+		setShowCartModal(true);
+	};
+
+	const closeCartModal = () => {
+		setSelectedItem(null);
+		setShowCartModal(false);
+	};
 
 	if (loading) return <div className="loading">Loading...</div>;
 	if (error) return <div className="error">Error: {error.message}</div>;
@@ -75,7 +85,9 @@ function Menu() {
 					))}
 				</div>
 			))}
-			<CartModal />
+			{showCartModal && (
+				<CartModal selectedItem={selectedItem} closeModal={closeCartModal} />
+			)}
 		</div>
 	);
 }
